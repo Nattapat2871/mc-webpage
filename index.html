@@ -1,42 +1,428 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>play minecraft with me </title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="icon" href="media/icon.png">
-    <link rel="stylesheet" href="mc.css">
+    <title>กำลังโหลดข้อมูลเซิร์ฟเวอร์...</title>
+    <link rel="icon" id="favicon" href="media/icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        ::selection {
+            background: #ffc0cb;
+            color: #333;
+        }
+
+        ::-moz-selection {
+            background: #ffc0cb;
+            color: #333;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: 'Kanit', sans-serif;
+            cursor: url('media/cursor.gif'), auto;
+        }
+
+        .button,
+        .ip-address,
+        .footer a {
+            cursor: url('media/pointer.gif'), pointer;
+        }
+
+        .background-video {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            transform: translateX(-50%) translateY(-50%);
+            object-fit: cover;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes card-enter {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 30px 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            max-width: 750px;
+            width: 100%;
+
+            /* --- ✨ ซ่อนการ์ดไว้ตอนแรกสุด --- */
+            opacity: 0;
+            transform: translateY(20px);
+            /* กำหนดตำแหน่งเริ่มต้นสำหรับอนิเมชั่น */
+            transition: opacity 0.5s ease;
+            /* เพิ่มความนุ่มนวลเผื่อกรณีไม่มีอนิเมชั่น */
+        }
+
+        /* --- ✨ Class ที่จะถูกเพิ่มโดย JavaScript เพื่อเริ่มอนิเมชั่น --- */
+        .card.card-visible {
+            opacity: 1;
+            animation: card-enter 0.8s ease-out forwards;
+        }
+
+        .server-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        #server-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            image-rendering: pixelated;
+            -webkit-user-drag: none;
+            user-select: none;
+            -moz-user-select: none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+        }
+
+        .index {
+            font-size: 50px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .ip-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .ip {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .ip-address {
+            transition: color 0.3s ease;
+        }
+
+        .ip-address:hover {
+            color: #ffc0cb;
+        }
+
+        .ip-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-bottom: 15px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 10px;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        .ip-tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #333 transparent transparent transparent;
+        }
+
+        .ip:hover .ip-tooltip {
+            opacity: 1;
+        }
+
+        #server-details {
+            font-size: 20px;
+        }
+
+        .motd {
+            font-family: 'Minecraftia', monospace;
+            font-size: 16px;
+            margin-top: 15px;
+            line-height: 1.5;
+            text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.7);
+            white-space: pre-wrap;
+            background-color: rgba(0, 0, 0, 0.25);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .button:hover {
+            background: rgba(232, 122, 144, 0.8);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(232, 122, 144, 0.4);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .button.disabled {
+            background: rgba(128, 128, 128, 0.3);
+            color: #aaa;
+            pointer-events: none;
+            border-color: rgba(128, 128, 128, 0.4);
+        }
+
+        .button.disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1s ease, visibility 1s ease;
+            z-index: 1000;
+        }
+
+        .popup.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .popup-image {
+            width: 100%;
+            height: 100%;
+            background-image: url('media/load.png');
+            background-size: cover;
+            background-position: center;
+            z-index: 1001;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            z-index: 5;
+        }
+
+        .footer a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .footer a:hover {
+            color: #ffc0cb;
+        }
+    </style>
 </head>
 
-<body onload="changeTitle()">
-
+<body>
     <video class="background-video" autoplay muted loop>
         <source src="media/background.mp4" type="video/mp4">
     </video>
-    <div class="content">
-        <div class="index">Minecraft Survival Server</div>
-        <div class="ip-container">
-            <div class="ip" id="ip">ip : <span class="ip-address">play.nattapat2871.online</span>&nbsp&nbsp&nbsp&nbsp&nbsp v 1.21.1  &nbsp&nbsp&nbsp
-                <span style="color: red;">🔴offline</span>
-            </div>
-            
-        </div>
-        <div class="buttons">
-            <a href="http://play.nattapat2871.online:51387/" class="button">Blue map</a>
-            <a href="https://discord.gg/zaAc5g6NuJ" class="button">Discord Server</a>
-            <a href="https://nattapat2871.online" class="button">back to main web</a>
-        </div>
-    </div>
-    
-    <div id="popup" class="popup" onclick="hidePopup()">
+    <div id="popup" class="popup">
         <div class="popup-image"></div>
     </div>
-    
+    <div class="content">
+        <div class="card">
+            <div class="server-header">
+                <img id="server-icon" src="media/icon.png" alt="Server Icon">
+                <div class="index">Minecraft Community Server</div>
+            </div>
+            <div class="ip-container">
+                <div class="ip" id="ip">
+                    IP : <span class="ip-address">play.nattapat2871.me</span>
+                    <span class="ip-tooltip" id="ip-tooltip">คลิกเพื่อคัดลอก</span>
+                </div>
+                <div id="server-details">
+                    <span style="color: grey;">กำลังโหลดสถานะ...</span>
+                </div>
+            </div>
+            <div class="buttons">
+                <a href="http://play.nattapat2871.me/bluemap" id="bluemap-btn" class="button">Blue map</a>
+                <a href="/discord" class="button">Discord Server</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer">
+        เปิดโดย <a href="https://github.com/nattapat2871" target="_blank">Nattapat2871</a> | พัฒนาโดย <a
+            href="https://github.com/nattapat2871" target="_blank">Nattapat2871</a>
+    </div>
     <audio id="click-sound" src="media/BtnSound.mp3" preload="auto"></audio>
 
-    
-    <script src="mc.js"></script>
+    <script>
+        const ipElement = document.getElementById('ip');
+        const ipTooltipElement = document.getElementById('ip-tooltip');
+        ipElement.addEventListener('click', function () {
+            const ipAddress = document.querySelector('.ip-address').textContent;
+            navigator.clipboard.writeText(ipAddress)
+                .then(() => { ipTooltipElement.textContent = 'คัดลอกแล้ว!'; })
+                .catch(err => {
+                    ipTooltipElement.textContent = 'เกิดข้อผิดพลาด!';
+                    console.error('Error copying text: ', err);
+                });
+        });
+        ipElement.addEventListener('mouseleave', function () {
+            setTimeout(() => { ipTooltipElement.textContent = 'คลิกเพื่อคัดลอก'; }, 500);
+        });
 
+        // --- ✨ แก้ไขฟังก์ชันนี้ ---
+        function hidePopup() {
+            document.getElementById('popup').classList.add('hidden');
+            // เพิ่มบรรทัดนี้เพื่อเริ่มอนิเมชั่นของการ์ด
+            document.querySelector('.card').classList.add('card-visible');
+        }
+
+        window.onload = function () {
+            setTimeout(hidePopup, 2000); // ซ่อน popup หลังจาก 2 วินาที
+        };
+
+        function playClickSound() {
+            var sound = document.getElementById('click-sound');
+            sound.currentTime = 0; sound.volume = 0.3; sound.play();
+        }
+        document.body.onclick = playClickSound;
+
+        function parseMinecraftMOTD(motdString) {
+            const colorMap = { '0': '#000', '1': '#00A', '2': '#0A0', '3': '#0AA', '4': '#A00', '5': '#A0A', '6': '#FA0', '7': '#AAA', '8': '#555', '9': '#55F', 'a': '#5F5', 'b': '#5FF', 'c': '#F55', 'd': '#F5F', 'e': '#FF5', 'f': '#FFF' };
+            const formatMap = { 'l': 'font-weight: bold;', 'm': 'text-decoration: line-through;', 'n': 'text-decoration: underline;', 'o': 'font-style: italic;' };
+            let html = '', openSpans = 0, currentStyles = {};
+            function applyStyles() {
+                if (openSpans > 0) html += '</span>'.repeat(openSpans);
+                openSpans = 0;
+                let styleString = '';
+                for (const style in currentStyles) { styleString += currentStyles[style]; }
+                if (styleString) { html += `<span style="${styleString}">`; openSpans++; }
+            }
+            for (let i = 0; i < motdString.length; i++) {
+                if (motdString[i] === '§') {
+                    i++;
+                    const code = motdString[i];
+                    if (code === 'r') currentStyles = {};
+                    else if (colorMap[code]) currentStyles.color = `color: ${colorMap[code]};`;
+                    else if (formatMap[code]) currentStyles[code] = formatMap[code];
+                    else if (code === '#' && motdString.substring(i + 1, i + 7).match(/^[0-9a-fA-F]{6}$/)) {
+                        currentStyles.color = `color: #${motdString.substring(i + 1, i + 7)};`; i += 6;
+                    }
+                    applyStyles();
+                } else html += motdString[i];
+            }
+            html += '</span>'.repeat(openSpans);
+            return html;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const serverAddress = "play.nattapat2871.me";
+            const apiUrl = `https://api.mcsrvstat.us/3/${serverAddress}`;
+            const serverDetailsElement = document.getElementById('server-details');
+            const serverIconElement = document.getElementById('server-icon');
+            const bluemapBtn = document.getElementById('bluemap-btn');
+            const favicon = document.getElementById('favicon');
+
+            fetch(apiUrl, { headers: { 'User-Agent': 'MyMinecraftWebsite/1.5' } })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.online) {
+                        if (data.icon) {
+                            serverIconElement.src = data.icon;
+                            favicon.href = data.icon;
+                        }
+                        const cleanMotd = data.motd.clean.map(line => line.trim()).filter(line => line).join(' | ');
+                        document.title = cleanMotd || "Minecraft Community Server";
+                        bluemapBtn.classList.remove('disabled');
+                        const motdHtml = data.motd.raw.map(line => parseMinecraftMOTD(line.trim())).join('<br>');
+                        serverDetailsElement.innerHTML = `
+                            <span>Version: ${data.version}</span>&nbsp;&nbsp;&nbsp;
+                            <span style="color: lightgreen;">🟢 online</span>
+                            <span>(${data.players.online}/${data.players.max})</span>
+                            <div class="motd">${motdHtml}</div>`;
+                    } else {
+                        document.title = "Server Offline | Minecraft";
+                        serverIconElement.src = 'media/icon.png';
+                        bluemapBtn.classList.add('disabled');
+                        serverDetailsElement.innerHTML = '<span style="color: red;">🔴 offline</span>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch API Error:', error);
+                    document.title = "Error | Minecraft";
+                    serverIconElement.src = 'media/icon.png';
+                    bluemapBtn.classList.add('disabled');
+                    serverDetailsElement.innerHTML = '<span style="color: yellow;">⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อ</span>';
+                });
+        });
+    </script>
 </body>
+
 </html>
